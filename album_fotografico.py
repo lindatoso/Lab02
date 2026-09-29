@@ -1,11 +1,36 @@
 def carica_da_file(file_path):
     """Carica le foto dal file, creando un nuovo anno ogni volta che compare per la prima volta"""
     # TODO
+    import csv
+
+    infile=open(file_path, 'r', encoding='UTF-8')
+    album=csv.reader(infile)
+    next(album)
+    dict_anni={}
+    for riga in album:
+
+        riga[4]=int(riga[4])
+        riga[3]=int(riga[3])
+        if riga[4] not in dict_anni:
+            dict_anni[riga[4]]=[riga[:4]]
+        else:
+            dict_anni[riga[4]].append(riga[:4])
+
+    dict_anni.pop(' anno')
+    print(dict_anni)
+
+    infile.close()
+    return dict_anni
 
 
-def aggiungi_foto(album, codice, titolo, autore, mese, anno, file_path):
+def aggiungi_foto(album, codice, titolo, autore, mese, anno, file_path,dict):
     """Aggiunge una foto all'album, creando l'anno al volo se non è ancora presente"""
     # TODO
+    if anno not in dict:
+        dict[anno] = [codice, titolo, autore, mese]
+    else:
+        dict[anno].append([codice, titolo, autore, mese])
+    print(dict)
 
 
 def cerca_foto(album, codice):
@@ -54,7 +79,7 @@ def main():
                 print("Errore: inserire valori numerici validi per mese e anno.")
                 continue
 
-            foto = aggiungi_foto(album, codice, titolo, autore, mese, anno, file_path)
+            foto = aggiungi_foto(album, codice, titolo, autore, mese, anno, file_path,dict_anni)
             if foto:
                 print(f"Foto aggiunta con successo!")
             else:
