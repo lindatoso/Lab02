@@ -48,26 +48,30 @@ def aggiungi_foto(album, codice, titolo, autore, mese, anno, file_path):
     """Aggiunge una foto all'album, creando l'anno al volo se non è ancora presente"""
     # TODO
     import csv
-    if anno not in album.keys():  # se l'anno inserito non è già presente nel dizionario, crea nuova chiave con relativo dizionario vuoto
+    if anno not in album:  # se l'anno inserito non è già presente nel dizionario, crea nuova chiave con relativo dizionario vuoto
         album[anno] = {}
-        if codice not in album[anno].keys(): # se il codice non corrisponde già a quello di un'altra foto
-            album[anno][codice]=[titolo, autore, mese] # aggiungi i dati inseriti in un dizionario con chiave il codice e attributi il resto
-            try:
-                outfile=open(file_path, 'a') # append - aggiungi al fondo del file
-                riga=[codice, titolo, autore, mese, anno] # campi da aggiungere
-                scrittore=csv.writer(outfile) # funzione csv che permette di aggiungere i campi in formato csv
-                scrittore.writerow(riga) # funzione che inserisce i dati della riga
-                outfile.close()
+    codes=[]
+    for anno in album: # per ogni anno dell'album
+        for i in album[anno]: # per ogni codice dell'anno
+            codes.append(i) # aggiungi codice a lista
 
-            except OSError:
-                print('File inesistente')
-
-            return True # restituisci booleano al main per stampare messaggi di successo/insuccesso
-        else:
-            print('Codice foto già in uso')
-            return False
+    if codice in codes: # se il codice corrisponde già a quello di un'altra foto
+        print('Codice foto già in uso')
+        return False
     else:
-        return None
+        album[anno][codice] = [titolo, autore, mese]  # aggiungi i dati inseriti in un dizionario con chiave il codice e attributi il resto
+        try:
+            outfile = open(file_path, 'a', newline='')  # append - aggiungi al fondo del file
+            riga = [codice, titolo, autore, mese, anno]  # campi da aggiungere
+            scrittore = csv.writer(outfile)  # funzione csv che permette di aggiungere i campi in formato csv
+            scrittore.writerow(riga)  # funzione che inserisce i dati della riga
+            outfile.close()
+
+        except OSError:
+            print('File inesistente')
+
+        return True  # restituisci booleano al main per stampare messaggi di successo/insuccesso
+
 
 
 def cerca_foto(album, codice):
@@ -95,8 +99,8 @@ def elenco_foto_anno_per_titolo(album, anno):
         for code in album[anno]: # per ogni codice dell'anno
             chiavi=list(album[anno].keys()) # creo una lista con i codici dell'anno
             dicto[album[anno][code][0]]=[code] # come chiave del dizionario vuoto metto il titolo e come primo valore in lista il codice
-            for j in range(1,len(album[anno][k])): # contatore da 1 a 3 (attributi relativi al codice)
-                dicto[album[anno][k][0]].append(album[anno][k][j]) # aggiungo al dizionario in lista autore e mese
+            for j in range(1,len(album[anno][code])): # contatore da 1 a 3 (attributi relativi al codice)
+                dicto[album[anno][code][0]].append(album[anno][code][j]) # aggiungo al dizionario in lista autore e mese
         ordinato=sorted(dicto.items()) # creo una lista di tuple ordinate alfabeticamente per titolo
         titoli=[] # lista vuota
         for a in range(0,len(ordinato)): # contatore da 0 a lunghezza lista di tuple
