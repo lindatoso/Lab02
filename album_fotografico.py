@@ -1,36 +1,58 @@
+""" CARICA_DA_FILE
+1. Apro il file csv in lettura
+2. Per ogni riga di file:
+    se l'anno non è presente:
+        inserisco l'anno come nuova chiave di un dizionario
+    inserisco il codice come chiave del sotto-dizionario con chiave l'anno e gli altri campi come lista
+
+AGGIUNGI_FOTO
+1. Seleziono il dizionario relativo all'anno selezionato
+2. Aggiungo alle chiavi del sotto dizionario il nuovo codice con valore il resto dei campi
+
+CERCA_FOTO
+1. Seleziono il dizionario relativo all'anno selezionato
+2. Scorro le chiavi del sotto dizionario per trovare un match
+
+ELENCO FOTO ANNO PER TITOLO
+1. Seleziono il dizionario relativo all'anno selezionato
+2. Per ogni chiave del sotto dizionario:
+    aggiungo il campo del titolo a una nuova lista
+3. Ordino la listagi"""
+
 def carica_da_file(file_path):
     """Carica le foto dal file, creando un nuovo anno ogni volta che compare per la prima volta"""
     # TODO
-    import csv
+    import csv # importo libreria di csv per lettura file
 
-    infile=open(file_path, 'r', encoding='UTF-8')
-    album=csv.reader(infile)
-    next(album)
-    dict_anni={}
+    infile=open(file_path, 'r', encoding='UTF-8') # apro file in lettura, encoding per accenti/caratteri speciali
+    album=csv.reader(infile) # apro file csv come lista, ogni elemento del quale è una riga - per leggerla ciclo for
+    next(album) # salto la prima riga (intestazione)
+    dict_anni={} # creo dizionario per classificare in anni
     for riga in album:
-
-        riga[4]=int(riga[4])
+        riga[4]=int(riga[4]) # trasformo il campo di anno e mese in intero
         riga[3]=int(riga[3])
-        if riga[4] not in dict_anni:
+        if riga[4] not in dict_anni: # se l'anno non è già presente nel dizionario (come chiave), crea una nuova chiave con annessa lista degli attributi rimanenti
             dict_anni[riga[4]]=[riga[:4]]
-        else:
+        else: # se l'anno è già presente, aggiungi alla lista di quell'anno gli attributi della foto in esame
             dict_anni[riga[4]].append(riga[:4])
 
-    dict_anni.pop(' anno')
     print(dict_anni)
 
-    infile.close()
-    return dict_anni
+    infile.close() # chiudi file
+    return dict_anni # restituisci al main il dizionario con le foto
 
 
 def aggiungi_foto(album, codice, titolo, autore, mese, anno, file_path,dict):
     """Aggiunge una foto all'album, creando l'anno al volo se non è ancora presente"""
     # TODO
-    if anno not in dict:
-        dict[anno] = [codice, titolo, autore, mese]
+    if codice not in dict[anno].values:
+        if anno not in dict: # se l'anno inserito non è già presente nel dizionario, crea nuova chiave con relativi valori in lista
+            dict[anno] = [codice, titolo, autore, mese]
+        else: # come per carica_da_file
+            dict[anno].append([codice, titolo, autore, mese])
+        return True # restituisci booleano al main per stampare messaggi di successo/insuccesso
     else:
-        dict[anno].append([codice, titolo, autore, mese])
-    print(dict)
+        return False
 
 
 def cerca_foto(album, codice):
@@ -79,7 +101,7 @@ def main():
                 print("Errore: inserire valori numerici validi per mese e anno.")
                 continue
 
-            foto = aggiungi_foto(album, codice, titolo, autore, mese, anno, file_path,dict_anni)
+            foto = aggiungi_foto(album, codice, titolo, autore, mese, anno, file_path,album)
             if foto:
                 print(f"Foto aggiunta con successo!")
             else:
