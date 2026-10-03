@@ -17,52 +17,96 @@ ELENCO FOTO ANNO PER TITOLO
 1. Seleziono il dizionario relativo all'anno selezionato
 2. Per ogni chiave del sotto dizionario:
     aggiungo il campo del titolo a una nuova lista
-3. Ordino la listagi"""
+3. Ordino la lista"""
 
 def carica_da_file(file_path):
     """Carica le foto dal file, creando un nuovo anno ogni volta che compare per la prima volta"""
     # TODO
     import csv # importo libreria di csv per lettura file
 
-    infile=open(file_path, 'r', encoding='UTF-8') # apro file in lettura, encoding per accenti/caratteri speciali
-    album=csv.reader(infile) # apro file csv come lista, ogni elemento del quale è una riga - per leggerla ciclo for
-    next(album) # salto la prima riga (intestazione)
-    dict_anni={} # creo dizionario per classificare in anni
-    for riga in album:
-        riga[4]=int(riga[4]) # trasformo il campo di anno e mese in intero
-        riga[3]=int(riga[3])
-        if riga[4] not in dict_anni: # se l'anno non è già presente nel dizionario (come chiave), crea una nuova chiave con annessa lista degli attributi rimanenti
-            dict_anni[riga[4]]=[riga[:4]]
-        else: # se l'anno è già presente, aggiungi alla lista di quell'anno gli attributi della foto in esame
-            dict_anni[riga[4]].append(riga[:4])
+    try:
+        infile=open(file_path, 'r', encoding='UTF-8') # apro file in lettura, encoding per accenti/caratteri speciali
+        album=csv.reader(infile) # apro file csv come lista, ogni elemento del quale è una riga - per leggerla ciclo for
+        next(album) # salto la prima riga (intestazione)
+        dict_anni={} # creo dizionario per classificare in anni
+        d = {}
+        for riga in album:
+            riga[4]=int(riga[4]) # trasformo il campo di anno e mese in intero
+            riga[3]=int(riga[3])
+            if riga[4] not in dict_anni: # se l'anno non è già presente nel dizionario (come chiave), crea una nuova chiave + lista vuota
+                dict_anni[riga[4]]={}
+            dict_anni[riga[4]][riga[0]]=riga[1:4] # aggiungi il dizionario alla lista dell'anno corrispondente
 
-    print(dict_anni)
+        print(dict_anni)
 
-    infile.close() # chiudi file
-    return dict_anni # restituisci al main il dizionario con le foto
+        infile.close() # chiudi file
+        return dict_anni # restituisci al main il dizionario con le foto
+    except OSError:
+        print("File inesistente")
 
 
 def aggiungi_foto(album, codice, titolo, autore, mese, anno, file_path,dict):
     """Aggiunge una foto all'album, creando l'anno al volo se non è ancora presente"""
     # TODO
-    if codice not in dict[anno].values:
-        if anno not in dict: # se l'anno inserito non è già presente nel dizionario, crea nuova chiave con relativi valori in lista
-            dict[anno] = [codice, titolo, autore, mese]
-        else: # come per carica_da_file
-            dict[anno].append([codice, titolo, autore, mese])
-        return True # restituisci booleano al main per stampare messaggi di successo/insuccesso
-    else:
-        return False
+    import csv
+    if anno not in dict.keys():  # se l'anno inserito non è già presente nel dizionario, crea nuova chiave con relativi valori in lista
+        dict[anno] = {}
+        if codice not in dict[anno].keys():
+            dict[anno][codice]=[titolo, autore, mese]
+            try:
+                outfile=open(file_path, 'a')
+                riga=[codice, titolo, autore, mese, anno]
+                scrittore=csv.writer(outfile)
+                scrittore.writerow(riga)
+                outfile.close()
+
+            except OSError:
+                print('File inesistente')
+
+            return True # restituisci booleano al main per stampare messaggi di successo/insuccesso
+        else:
+            return False
 
 
 def cerca_foto(album, codice):
     """Cerca una foto nell'album dato il codice"""
     # TODO
+    for i in album.keys():
+        if codice in album[i]:
+            risultato=[]
+            risultato.append(codice)
+            for k in album[i][codice]:
+                risultato.append(k)
+            risultato.append(i)
+            riga=risultato[0]
+            for j in range(1,len(risultato)):
+                riga=riga+', '+str(risultato[j])
+            return riga
 
 
 def elenco_foto_anno_per_titolo(album, anno):
     """Ordina i titoli delle foto di un dato anno in ordine alfabetico"""
     # TODO
+    if anno in album:
+        dicto={}
+        l=0
+        for k in album[anno]:
+            chiavi=list(album[anno].keys())
+            dicto[album[anno][k][0]]=[chiavi[l]]
+            for j in range(1,len(album[anno][k])):
+                dicto[album[anno][k][0]].append(album[anno][k][j])
+            l+=1
+        ordinato=sorted(dicto.items())
+        titoli=[]
+        for a in range(0,len(ordinato)):
+            titoli.append(str(ordinato[a][0]))
+            for b in range (0,3):
+                titoli[a]=titoli[a]+', '+str(ordinato[a][1][b])
+
+        return titoli
+    else:
+        return None
+
 
 
 def main():
@@ -133,7 +177,7 @@ def main():
             titoli = elenco_foto_anno_per_titolo(album, anno)
             if titoli is not None:
                 print(f'\nFoto del {anno}:')
-                print("\n".join([f"- {titolo}" for titolo in titoli]))
+                print("\n".join([f"- {title}" for title in titoli]))
             else:
                 print(f"Nessuna foto trovata per l'anno {anno}.")
 
