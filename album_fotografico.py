@@ -1,3 +1,4 @@
+# noinspection SpellCheckingInspection
 """ CARICA_DA_FILE
 1. Apro il file csv in lettura
 2. Per ogni riga di file:
@@ -35,9 +36,6 @@ def carica_da_file(file_path):
             if riga[4] not in dict_anni: # se l'anno non è già presente nel dizionario (come chiave), crea una nuova chiave + dizionario vuoto
                 dict_anni[riga[4]]={}
             dict_anni[riga[4]][riga[0]]=riga[1:4] # aggiungi il dizionario alla lista dell'anno corrispondente con chiave il codice e valori titolo, autore e mese in lista
-
-        print(dict_anni)
-
         infile.close() # chiudi file
         return dict_anni # restituisci al main il dizionario con le foto
     except OSError: # errore sul file
@@ -67,7 +65,7 @@ def aggiungi_foto(album, codice, titolo, autore, mese, anno, file_path):
             scrittore.writerow(riga)  # funzione che inserisce i dati della riga
             outfile.close()
 
-        except OSError:
+        except OSError: # errori di input-output
             print('File inesistente')
 
         return True  # restituisci booleano al main per stampare messaggi di successo/insuccesso
