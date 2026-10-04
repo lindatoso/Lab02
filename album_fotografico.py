@@ -71,7 +71,6 @@ def aggiungi_foto(album, codice, titolo, autore, mese, anno, file_path):
         return True  # restituisci booleano al main per stampare messaggi di successo/insuccesso
 
 
-
 def cerca_foto(album, codice):
     """Cerca una foto nell'album dato il codice"""
     # TODO
